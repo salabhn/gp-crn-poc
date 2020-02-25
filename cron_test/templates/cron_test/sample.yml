@@ -1,0 +1,73 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  annotations:
+  labels:
+    name: django-psql-persistent
+  name: cron_test-job-testing
+  namespace: cron_test-poc
+spec:
+  schedule: "{{ schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: django-psql-persistent
+        spec:
+          containers:
+          - env:
+            - name: DATABASE_SERVICE_NAME
+              value: postgresql
+            - name: DATABASE_ENGINE
+              value: postgresql
+            - name: DATABASE_NAME
+              value: default
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: django-psql-persistent
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: django-psql-persistent
+            - name: APP_CONFIG
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: django-secret-key
+                  name: django-psql-persistent
+            - name: DATABASE_HOST
+              value: postgresql
+            - name: DATABASE_PORT
+              value: "5432"
+            image: docker-registry.default.svc:5000/cron_test-poc/django-psql-persistent:latest
+            command: {{ command }}
+            imagePullPolicy: IfNotPresent
+            name: django-psql-persistent
+            ports:
+            - containerPort: 8080
+              protocol: TCP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: default-token-ss269
+              readOnly: true
+          dnsPolicy: ClusterFirst
+          imagePullSecrets:
+          - name: default-dockercfg-247m5
+          nodeName: ip-10-0-1-56.us-west-2.compute.internal
+          nodeSelector:
+            node-role.kubernetes.io/compute: "true"
+          priority: 0
+          restartPolicy: OnFailure
+          volumes:
+          - name: default-token-ss269
+            secret:
+              defaultMode: 420
+              secretName: default-token-ss269
