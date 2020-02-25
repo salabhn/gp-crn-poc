@@ -23,3 +23,10 @@ def update_cron_job(sender, instance, created, **kwargs):
     for pod in pods:
         logger.info('POD:::%s' % pod)
         logger.info(dir(pod))
+
+    v1_services = dyn_client.resources.get(api_version='v1', kind='CronJob')
+    logger.info('CronJobs::: %s' % dir(v1_services))
+    pods = v1_services.get()
+    for pod in pods:
+        logger.info('CronJob:::%s' % pod)
+        logger.info(dir(pod))
