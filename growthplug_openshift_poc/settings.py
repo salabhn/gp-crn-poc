@@ -141,7 +141,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'handlers': ['console'],
             'propagate': False,
         },
