@@ -76,12 +76,8 @@ WSGI_APPLICATION = 'growthplug_openshift_poc.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DATABASE_NAME', 'default'),
-        'USER': os.environ.get('DATABASE_USER', 'django'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'nAuPExDfsYeOYmW6'),
-        'HOST': os.environ.get('DATABASE_HOST', ''),
-        'PORT': os.environ.get('DATABASE_PORT', ''),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
