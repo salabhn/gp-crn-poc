@@ -17,7 +17,7 @@ def update_cron_job(sender, instance, created, **kwargs):
     logger.info(client.Configuration)
     logger.info(dir(client.Configuration()))
     v1 = client.ApiClient()
-    dyn_client = DynamicClient()
+    dyn_client = DynamicClient(v1)
     v1_services = dyn_client.resources.get(api_version='v1', kind='Pod')
     logger.info('PODS::: %s' % v1_services)
     logger.info('PODS::: %s' % dir(v1_services))
