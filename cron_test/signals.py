@@ -7,6 +7,7 @@ from .models import CronJob
 
 logger = logging.getLogger('django')
 
+
 @receiver(post_save, sender=CronJob)
 def update_chargebee_add_on(sender, instance, created, **kwargs):
     logger.info('LOG WORKING')
