@@ -17,7 +17,7 @@ def update_cron_job(sender, instance, created, **kwargs):
     context = Context({
         'schedule': instance.schedule,
         'command': mark_safe(instance.command.split(' ')),
-        'enabled': instance.enabled,
+        'enabled': not instance.enabled,
         'name': instance.name
     })
     cron_definition = yaml.load(render_to_string('cron_test/sample.yml', context))
