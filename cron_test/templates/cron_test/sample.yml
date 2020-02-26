@@ -4,7 +4,7 @@ metadata:
   annotations:
   labels:
     name: django-psql-persistent
-  name: cron-test-job-testing
+  name: {{ name }}
   namespace: cron-poc
 spec:
   schedule: "{{ schedule }}"
@@ -34,12 +34,6 @@ spec:
                 secretKeyRef:
                   key: database-password
                   name: django-psql-persistent
-            - name: APP_CONFIG
-            - name: DJANGO_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: django-secret-key
-                  name: django-psql-persistent
             - name: DATABASE_HOST
               value: postgresql
             - name: DATABASE_PORT
@@ -59,15 +53,10 @@ spec:
               name: default-token-ss269
               readOnly: true
           dnsPolicy: ClusterFirst
-          imagePullSecrets:
-          - name: default-dockercfg-247m5
-          nodeName: ip-10-0-1-56.us-west-2.compute.internal
-          nodeSelector:
-            node-role.kubernetes.io/compute: "true"
-          priority: 0
           restartPolicy: OnFailure
           volumes:
           - name: default-token-ss269
             secret:
               defaultMode: 420
               secretName: default-token-ss269
+  suspend: {{ enabled }}

@@ -1,7 +1,10 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+import yaml
+from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
+from django.template import Context
 from kubernetes import client, config
-from openshift.dynamic import DynamicClient
 import logging
 
 from .models import CronJob
@@ -11,22 +14,34 @@ logger = logging.getLogger('django')
 
 @receiver(post_save, sender=CronJob)
 def update_cron_job(sender, instance, created, **kwargs):
-    logger.info('LOG WORKING')
-    config.load_incluster_config()
-    logger.info(client.Configuration)
-    logger.info(dir(client.Configuration()))
-    v1 = client.ApiClient()
-    dyn_client = DynamicClient(v1)
-    v1_services = dyn_client.resources.get(api_version='v1', kind='Pod')
-    logger.info('PODS::: %s' % dir(v1_services))
-    pods = v1_services.get()
-    for pod in pods:
-        logger.info('POD:::%s' % pod)
-        logger.info(dir(pod))
+    context = Context({
+        'schedule': instance.schedule,
+        'command': mark_safe(instance.command.split(' ')),
+        'enabled': instance.enabled
+    })
+    cron_definition = yaml.load(render_to_string('cron_test/sample.yml', context))
 
-    v1_services = dyn_client.resources.get(api_version='v1', kind='CronJob')
-    logger.info('CronJobs::: %s' % dir(v1_services))
-    pods = v1_services.get()
-    for pod in pods:
-        logger.info('CronJob:::%s' % pod)
-        logger.info(dir(pod))
+    # Load the default configuration of the cluster
+    config.load_incluster_config()
+    kube_cron_job_client = client.BatchV1beta1Api()
+    cron_job = client.V1beta1CronJob()
+    for key, value in cron_definition.items():
+        setattr(cron_job, key, value)
+    if created:
+        try:
+            kube_cron_job_client.create_namespaced_cron_job('cron-poc', cron_job)
+        except Exception as e:
+            logger.info("Error creating cron job:%s" % e)
+    else:
+        try:
+            kube_cron_job_client.replace_namespaced_cron_job('cron-poc', cron_job)
+        except Exception as e:
+            logger.info("Error updating cron job: %s" % e)
+
+
+@receiver(post_delete, sender=CronJob)
+def delete_cron_job(sender, instance, **kwargs):
+    # Load the default configuration of the cluster
+    config.load_incluster_config()
+    kube_cron_job_client = client.BatchV1beta1Api()
+    kube_cron_job_client.delete_namespaced_cron_job(instance.name, 'cron-poc')
