@@ -1,11 +1,11 @@
-apiVersion: batch/v1beta1
+api_version: batch/v1beta1
 kind: CronJob
 metadata:
   annotations:
   labels:
     name: django-psql-persistent
-  name: cron_test-job-testing
-  namespace: cron_test-poc
+  name: cron-test-job-testing
+  namespace: cron-poc
 spec:
   schedule: "{{ schedule }}"
   jobTemplate:
@@ -44,7 +44,7 @@ spec:
               value: postgresql
             - name: DATABASE_PORT
               value: "5432"
-            image: docker-registry.default.svc:5000/cron_test-poc/django-psql-persistent:latest
+            image:  docker-registry.default.svc:5000/cron-poc/django-psql-persistent:latest
             command: {{ command }}
             imagePullPolicy: IfNotPresent
             name: django-psql-persistent
