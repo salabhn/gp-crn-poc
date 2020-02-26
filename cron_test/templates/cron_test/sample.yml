@@ -59,4 +59,4 @@ spec:
             secret:
               defaultMode: 420
               secretName: default-token-ss269
-  suspend: {{ enabled }}
+  suspend: {{ disabled }}

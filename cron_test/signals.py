@@ -17,7 +17,7 @@ def update_cron_job(sender, instance, created, **kwargs):
     context = Context({
         'schedule': instance.schedule,
         'command': mark_safe(instance.command.split(' ')),
-        'enabled': not instance.enabled,
+        'disabled': not instance.enabled,
         'name': instance.name
     })
     cron_definition = yaml.load(render_to_string('cron_test/sample.yml', context))
@@ -35,7 +35,7 @@ def update_cron_job(sender, instance, created, **kwargs):
             logger.info("Error creating cron job:%s" % e)
     else:
         try:
-            kube_cron_job_client.replace_namespaced_cron_job('cron-poc', cron_job)
+            kube_cron_job_client.replace_namespaced_cron_job(instance.name, 'cron-poc', cron_job)
         except Exception as e:
             logger.info("Error updating cron job: %s" % e)
 
